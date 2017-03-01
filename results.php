@@ -1,111 +1,83 @@
-<!DOCTYPE html>
-<html lang="en-nz">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Boogle</title>
+<?php
+  // Save the query submitted to a variable
+  $searchQuery = $_GET['q'];
 
-  <link rel="stylesheet" type="text/css" href="css/app.css">
-  <link rel="stylesheet" type="text/css" href="css/style.css">
-</head>
-<body>
-  <nav class="navbar navbar-default navbar-static-top">
-    <div class="container">
-      <div class="navbar-header">
-        <!-- Collapsed Hamburger -->
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-navbar-collapse">
-          <span class="sr-only">Toggle Navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
+  // Pull in the large data array
+  $data = require 'includes/data.php';
 
-        <!-- Branding Image -->
-        <a class="navbar-brand" href="index.php">
-         <img width="80px" class="logo-top" src="img/logo.png"/>
-       </a>
-     </div>
+  // This magical function searches through an array
+  function filterResults($searchQuery, $data) {
+          $matches = [];
 
-     <div class="collapse navbar-collapse" id="app-navbar-collapse">
-      <!-- Left Side Of Navbar -->
-      <ul class="nav navbar-nav">
-        <li>
-          <div class="field top-bar-search" id="searchform">
-            <input type="text" name="q" autofocus required value="$searchQuery" />
-          </div>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
+          foreach ($data as $key => $value) {
+            if (strpos(strtolower($value['text']), strtolower($searchQuery)) !== false) {
+              $matches[] = $value;
+            }
+          }
+          return $matches;
+      }
 
+  // Here is where the magical function is called and returns the results.
+  $terms = filterResults($searchQuery, $data);
+
+  require 'partials/header.php';
+  require 'partials/navigation.php';
+?>
 <!-- Content -->
 <div class="container">
   <div class="row">
     <div class="col-md-8 col-md-offset-2">
-      <h4>Search results for <strong>$searchQuery</strong></h4>
+      <h4>Search results for <strong><?= $searchQuery; ?></strong></h4>
       <!-- Displayed results -->
       <ul class="list-group">
-        <!-- Single Result -->
-        <li class="list-group-item notification-bar-fail m-b-1">
-          <div href="#" class="notification-bar-icon">
-            <div>
-              <i></i>
-            </div>
-          </div>
+        <?php
+        // If there are no results...
+        if (empty($terms)):
+        ?>
+          <li class="list-group-item notification-bar-fail m-b-1">
 
-          <div class="notification-bar-details">
-          <a href="$url" class="notification-bar-title">
-              $searchQuery['text']
-            </a>
-            <span class="text-muted">$searchQuery['url']</span>
-          </div>
-        </li>
-        <!-- End of single result -->
-        <li class="list-group-item notification-bar-fail m-b-1">
-          <div href="#" class="notification-bar-icon">
-            <div>
-              <i></i>
-            </div>
-          </div>
 
-          <div class="notification-bar-details">
-          <a href="$url" class="notification-bar-title">
-              $searchQuery['text']
-            </a>
-            <span class="text-muted">$searchQuery['url']</span>
-          </div>
-        </li>
-        <!-- End of single result -->
-        <li class="list-group-item notification-bar-fail m-b-1">
-          <div href="#" class="notification-bar-icon">
-            <div>
-              <i></i>
-            </div>
-          </div>
+            <div class="notification-bar-details">
+              <h3 class="notification-bar-title">
+                Nothing was found :(<br>
+              </h3>
+              <p>
+                <strong>Suggestions:</strong>
+                <ul>
+                  <li>Make sure that all words are spelled correctly.</li>
+                  <li>Try different keywords.</li>
+                  <li>Try more general keywords.</li>
+                </ul>
 
-          <div class="notification-bar-details">
-          <a href="$url" class="notification-bar-title">
-              $searchQuery['text']
-            </a>
-            <span class="text-muted">$searchQuery['url']</span>
-          </div>
-        </li>
-        <!-- End of single result -->
+              </p>
+            </div>
+          </li>
+          <!-- End of single result -->
+        <?php
+
+        // If there are results
+        else:
+          foreach ($terms as $term):
+          ?>
+          <!-- Single Result -->
+          <li class="list-group-item notification-bar-fail m-b-1">
+            <div class="notification-bar-details">
+            <a href="<?= $term['url'] ?>" class="notification-bar-title">
+                <?= $term['text'] ?>
+              </a>
+              <span class="text-muted"><?= $term['url'] ?></span>
+            </div>
+          </li>
+          <!-- End of single result -->
+          <?php
+          endforeach;
+        endif;
+        ?>
       </ul>
     </div>
   </div>
 </div>
-<div class="footer-bottom">
-  <div class="container">
-    <p class="pull-left"> Copyright &copy; Boogle 2017. All rights reserved. </p>
-    <div class="pull-right">
-      <ul class="nav nav-pills">
-        <li><a href="feedback.php">Feedback</a></li>
-      </ul>
-    </div>
-  </div>
-</div>
-</body>
-</html>
+<?php
+  require 'partials/footer-bottom.php';
+  require 'partials/footer.php';
+?>
